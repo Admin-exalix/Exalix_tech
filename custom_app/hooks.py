@@ -1,8 +1,8 @@
-app_name = "custom_app"
-app_title = "Custom App"
-app_publisher = "Krish"
+app_name = "exalix_tech"
+app_title = "Exalix Tech"
+app_publisher = "Exalix Tech"
 app_description = "Custom changes"
-app_email = "krishpatel8071@gmail.com"
+app_email = "admin@exalix.tech"
 app_license = "mit"
 
 doc_events = {
