@@ -1,0 +1,180 @@
+worker_processes auto;
+pid /run/nginx.pid;
+error_log /var/log/nginx/error.log;
+include /etc/nginx/modules-enabled/*.conf;
+events {
+    worker_connections 768;
+    multi_accept on;
+}
+http {
+    sendfile on;
+    tcp_nopush on;
+    types_hash_max_size 2048;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    access_log /var/log/nginx/access.log;
+
+    # exalixtech.com
+    server {
+        listen 80;
+        server_name exalixtech.com www.exalixtech.com;
+        return 301 https://$host$request_uri;
+    }
+    server {
+        listen 443 ssl;
+        server_name exalixtech.com www.exalixtech.com;
+
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
+        
+        location / {
+            proxy_pass http://frappe_docker-backend-1:8000;  # Backend container IP
+            proxy_set_header Host "exalix";
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        location /socket.io/ {
+            proxy_pass http://frappe_docker-websocket-1:9000;  # WebSocket container (e.g., websocket:9000)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 120;
+        }
+        location /assets/ {
+            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
+            try_files $uri $uri/ =404;
+        }
+        location /files/ {
+            root /home/frappe/frappe-bench/sites/exalix/public;
+            try_files $uri $uri/ =404;
+        }
+    }
+
+    # Demo.exalixtech.com
+    server {
+        listen 80;
+        server_name demo.exalixtech.com;
+        return 301 https://$host$request_uri;
+    }
+    server {
+        listen 443 ssl;
+        server_name demo.exalixtech.com;
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
+        location / {
+            proxy_pass http://frappe_docker-backend-demo-1:8000;  # Backend container IP
+            proxy_set_header Host "demo.exalixtech.com";
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        location /socket.io/ {
+            proxy_pass http://frappe_docker-websocket-1:9000;  # WebSocket container (e.g., websocket:9000)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 120;
+        }
+        location /assets/ {
+            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
+            try_files $uri $uri/ =404;
+        }
+        location /files/ {
+            root /home/frappe/frappe-bench/sites/demo/public;
+            try_files $uri $uri/ =404;
+        }
+    }
+
+    # krish.exalixtech.com
+    server {
+        listen 80;
+        server_name krish.exalixtech.com;
+        return 301 https://$host$request_uri;
+    }
+    server {
+        listen 443 ssl;
+        server_name krish.exalixtech.com;
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
+        location / {
+            proxy_pass http://frappe_docker-backend-krish-1:8000;  # Backend container IP
+            proxy_set_header Host "krish.exalix";
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        location /socket.io/ {
+            proxy_pass http://frappe_docker-websocket-krish-1:9000;  # WebSocket container (e.g., websocket:9000)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 120;
+        }
+        location /assets/ {
+            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
+            try_files $uri $uri/ =404;
+        }
+        location /files/ {
+            root /home/frappe/frappe-bench/sites/krish.exalix/public;
+            try_files $uri $uri/ =404;
+        }
+    }
+
+    # niraliceramic.exalixtech.com
+    server {
+        listen 80;
+        server_name niraliceramic.exalixtech.com;
+        return 301 https://$host$request_uri;
+    }
+    server {
+        listen 443 ssl;
+        server_name niraliceramic.exalixtech.com;
+        ssl_certificate /etc/nginx/ssl/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
+        location / {
+            proxy_pass http://frappe_docker-backend-niraliceramic-1:8000;  # Backend container IP
+            proxy_set_header Host "niraliceramic.exalix";
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        location /socket.io/ {
+            proxy_pass http://frappe_docker-websocket-niraliceramic-1:9000;  # WebSocket container (e.g., websocket:9000)
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_read_timeout 120;
+        }
+        location /assets/ {
+            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
+            try_files $uri $uri/ =404;
+        }
+        location /files/ {
+            root /home/frappe/frappe-bench/sites/niraliceramic.exalix/public/files/;
+            try_files $uri $uri/ =404;
+        }
+    }
+}
