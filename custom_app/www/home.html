@@ -1,180 +1,786 @@
-worker_processes auto;
-pid /run/nginx.pid;
-error_log /var/log/nginx/error.log;
-include /etc/nginx/modules-enabled/*.conf;
-events {
-    worker_connections 768;
-    multi_accept on;
-}
-http {
-    sendfile on;
-    tcp_nopush on;
-    types_hash_max_size 2048;
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    access_log /var/log/nginx/access.log;
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
 
-    # exalixtech.com
-    server {
-        listen 80;
-        server_name exalixtech.com www.exalixtech.com;
-        return 301 https://$host$request_uri;
-    }
-    server {
-        listen 443 ssl;
-        server_name exalixtech.com www.exalixtech.com;
-
-        ssl_certificate /etc/nginx/ssl/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
-        
-        location / {
-            proxy_pass http://frappe_docker-backend-1:8000;  # Backend container IP
-            proxy_set_header Host "exalix";
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-        location /socket.io/ {
-            proxy_pass http://frappe_docker-websocket-1:9000;  # WebSocket container (e.g., websocket:9000)
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_read_timeout 120;
-        }
-        location /assets/ {
-            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
-            try_files $uri $uri/ =404;
-        }
-        location /files/ {
-            root /home/frappe/frappe-bench/sites/exalix/public;
-            try_files $uri $uri/ =404;
-        }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exalix Tech | Expert ERPNext Implementor, Customization & Support</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #f8fafc;
+      position: relative;
+      overflow-x: hidden;
     }
 
-    # Demo.exalixtech.com
-    server {
-        listen 80;
-        server_name demo.exalixtech.com;
-        return 301 https://$host$request_uri;
-    }
-    server {
-        listen 443 ssl;
-        server_name demo.exalixtech.com;
-        ssl_certificate /etc/nginx/ssl/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
-        location / {
-            proxy_pass http://frappe_docker-backend-demo-1:8000;  # Backend container IP
-            proxy_set_header Host "demo.exalixtech.com";
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-        location /socket.io/ {
-            proxy_pass http://frappe_docker-websocket-1:9000;  # WebSocket container (e.g., websocket:9000)
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_read_timeout 120;
-        }
-        location /assets/ {
-            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
-            try_files $uri $uri/ =404;
-        }
-        location /files/ {
-            root /home/frappe/frappe-bench/sites/demo/public;
-            try_files $uri $uri/ =404;
-        }
+    .pt-20,
+    .py-20 {
+      padding-top: 3rem !important;
     }
 
-    # krish.exalixtech.com
-    server {
-        listen 80;
-        server_name krish.exalixtech.com;
-        return 301 https://$host$request_uri;
-    }
-    server {
-        listen 443 ssl;
-        server_name krish.exalixtech.com;
-        ssl_certificate /etc/nginx/ssl/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
-        location / {
-            proxy_pass http://frappe_docker-backend-krish-1:8000;  # Backend container IP
-            proxy_set_header Host "krish.exalix";
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-        location /socket.io/ {
-            proxy_pass http://frappe_docker-websocket-krish-1:9000;  # WebSocket container (e.g., websocket:9000)
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_read_timeout 120;
-        }
-        location /assets/ {
-            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
-            try_files $uri $uri/ =404;
-        }
-        location /files/ {
-            root /home/frappe/frappe-bench/sites/krish.exalix/public;
-            try_files $uri $uri/ =404;
-        }
+    span {
+      color: #023344;
     }
 
-    # niraliceramic.exalixtech.com
-    server {
-        listen 80;
-        server_name niraliceramic.exalixtech.com;
-        return 301 https://$host$request_uri;
+    a:hover {
+      text-decoration: none;
     }
-    server {
-        listen 443 ssl;
-        server_name niraliceramic.exalixtech.com;
-        ssl_certificate /etc/nginx/ssl/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-        ssl_trusted_certificate /etc/nginx/ssl/chain.pem;
-        location / {
-            proxy_pass http://frappe_docker-backend-niraliceramic-1:8000;  # Backend container IP
-            proxy_set_header Host "niraliceramic.exalix";
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-        location /socket.io/ {
-            proxy_pass http://frappe_docker-websocket-niraliceramic-1:9000;  # WebSocket container (e.g., websocket:9000)
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_read_timeout 120;
-        }
-        location /assets/ {
-            root /home/frappe/frappe-bench/sites;  # Ensure correct directory for assets
-            try_files $uri $uri/ =404;
-        }
-        location /files/ {
-            root /home/frappe/frappe-bench/sites/niraliceramic.exalix/public/files/;
-            try_files $uri $uri/ =404;
-        }
+
+    .hero-bg {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg,
+          #90C3C8 0%,
+          #ffffff 100%);
+      /* Lighter, subtle initial gradient */
     }
-}
+
+    .hero-bg::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23dbeafe' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zm0 30v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zm0-30V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      /* Subtle grid pattern */
+      opacity: 0.3;
+      /* Make it less prominent */
+      z-index: 1;
+    }
+
+    .section-heading-wrapper {
+      text-align: center;
+    }
+
+    .section-heading-wrapper span {
+      font-weight: bold;
+      font-size: 2rem;
+    }
+
+    .section-title {
+      padding-bottom: 10px;
+    }
+
+    .section-subtitle {
+      padding-top: 10px;
+    }
+
+    #navbar a:hover {
+      color: #136a89;
+    }
+
+    .subtle-bg {
+      background-color: #f8fafc;
+      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    .section-heading-wrapper {
+      @apply text-center mb-12 md:mb-16 relative;
+    }
+
+    .section-title {
+      @apply inline-block text-3xl md:text-5xl font-bold text-[#0f172b] relative pb-4 z-10;
+    }
+
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      md: width: 200px;
+      height: 4px;
+      background: linear-gradient(135deg,
+          #ffffff 0%,
+          #90C3C8 100%);
+      /* Lighter, subtle initial gradient */
+      border-radius: 2px;
+    }
+
+    .background-text {
+      @apply absolute -top-4 left-1/2 -translate-x-1/2 text-6xl md:text-8xl font-black text-gray-100;
+      z-index: 0;
+      white-space: nowrap;
+      -webkit-user-select: none;
+      /* Safari */
+      -ms-user-select: none;
+      /* IE 10 and IE 11 */
+      user-select: none;
+      /* Standard syntax */
+    }
+
+    .section-subtitle {
+      @apply mt-4 text-base md:text-lg text-gray-600 max-w-2xl mx-auto relative z-10;
+    }
+
+    .service-card {
+      @apply bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 text-center;
+    }
+
+    .service-icon-wrapper {
+      @apply w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-6 shadow-sm transition-all duration-300;
+    }
+
+    .service-icon-wrapper i {
+      @apply text-3xl text-[#0f172b];
+    }
+
+    .service-card:hover .service-icon-wrapper {
+      @apply bg-[#0f172b] shadow-lg;
+    }
+
+    .service-card:hover .service-icon-wrapper i {
+      @apply text-white;
+    }
+
+    .why-us-card {
+      @apply bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 text-center;
+    }
+
+    .industry-card {
+      @apply bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-105;
+    }
+
+    nav.scrolled {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+
+    .cta-button {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      /* 16px */
+      color: white;
+      background-color: #0f172b;
+      display: inline-flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 14px 0 rgba(15, 23, 43, 0.25);
+    }
+
+    @media (min-width: 768px) {
+      .cta-button {
+        padding: 1rem 2rem;
+        font-size: 1.125rem;
+        /* 18px */
+      }
+    }
+
+    .cta-button::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #136a89;
+      color: white;
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.4s ease-in-out;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px #00425c;
+      color: white;
+    }
+
+    .cta-button:hover::before {
+      opacity: 1;
+    }
+
+    .cta-button i {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .cta-button:hover i {
+      transform: translateX(5px);
+    }
+
+    #services {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    #why-us {
+      background: linear-gradient(145deg,
+          #90C3C8 0%,
+          #ffffff 100%);
+    }
+
+    #testimonials {
+      background: linear-gradient(180deg, #f1f5f9 0%, #f8fafc 100%);
+    }
+
+    #process {
+      background: linear-gradient(145deg,
+          #90C3C8 0%,
+          #ffffff 100%);
+    }
+
+    /* Hide by default on mobile */
+    .nav-links {
+      display: none;
+    }
+
+    /* Show on medium screens and above (≥768px) */
+    @media (min-width: 1025px) {
+      .nav-links {
+        display: flex;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 1025px) {
+      #mobile-menu-button {
+        display: flex;
+        align-items: center;
+      }
+
+      .logo {
+        margin-left: 10px !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50">
+  <nav id="navbar" class="fixed w-full z-50 top-0 transition-all duration-300 p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="#" class="text-2xl font-bold text-gray-800">
+        <img class="logo" src="/files/Logo.png" alt="Exalix Tech Logo" style="width:60px; height:auto;margin-left:50px">
+      </a>
+      <div class="nav-links md:flex space-x-8 items-center">
+        <a href="#services" class="text-gray-600 font-medium transition duration-300">Services</a>
+        <a href="#why-us" class="text-gray-600 font-medium transition duration-300">Why Us</a>
+        <a href="#industries" class="text-gray-600 font-medium transition duration-300">Industries</a>
+        <a href="#process" class="text-gray-600 font-medium transition duration-300">Our Process</a>
+        <a href="#testimonials" class="text-gray-600 font-medium transition duration-300">Testimonials</a>
+        <a href="#contact"
+          class="bg-[#0f172b] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#00425c] transition duration-300 font-semibold">Get
+          a Quote</a>
+      </div>
+      <button id="mobile-menu-button" class="md:hidden text-gray-800 focus:outline-none">
+        <i class="fas fa-bars text-2xl"></i>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden bg-white mt-4 rounded-lg shadow-xl">
+      <a href="#services" class="block py-3 px-4 text-gray-600 hover:bg-gray-100">Services</a>
+      <a href="#why-us" class="block py-3 px-4 text-gray-600 hover:bg-gray-100">Why Us</a>
+      <a href="#industries" class="block py-3 px-4 text-gray-600 hover:bg-gray-100">Industries</a>
+      <a href="#process" class="block py-3 px-4 text-gray-600 hover:bg-gray-100">Our Process</a>
+      <a href="#testimonials" class="block py-3 px-4 text-gray-600 hover:bg-gray-100">Testimonials</a>
+      <a href="#contact" class="block py-3 px-4 bg-[#0f172b] text-white text-center rounded-b-lg hover:bg-slate-800">Get
+        a Quote</a>
+    </div>
+  </nav>
+
+  <header class="min-h-screen hero-bg flex items-center pt-20 md:pt-0">
+    <div class="container mx-auto px-6 text-center relative z-10">
+      <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 leading-tight" data-aos="fade-down">
+        <span style="color:#00425c">
+          Exalix Tech
+        </span>
+        <br class="" />
+        for Your Business Growth.
+      </h1>
+      <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+        Unlock the full potential of ERPNext with our certified
+        implementation, customization, and ongoing support services. We tailor
+        ERPNext to fit your unique business needs.
+      </p>
+      <div class="mt-10" data-aos="fade-up" data-aos-delay="400">
+        <a href="#contact" class="cta-button">
+          Book Your Free Consultation
+          <i class="fas fa-arrow-right ml-3"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section id="services" class="py-20">
+    <div class="container mx-auto px-6" style="text-align:center">
+      <div class="section-heading-wrapper">
+        <span class="background-text" aria-hidden="true">SERVICES</span>
+        <h2 class="section-title" data-aos="fade-up">
+          Our Comprehensive ERPNext Services
+        </h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+          From initial consultation to ongoing support, we provide end-to-end
+          solutions to ensure your success with ERPNext.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+        <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-rocket"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Implementation & Deployment
+          </h3>
+          <p class="text-gray-600">
+            We handle the complete setup, configuration, and deployment of
+            ERPNext, whether on-cloud or on-premise, for a seamless
+            transition.
+          </p>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-drafting-compass"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Customization & Development
+          </h3>
+          <p class="text-gray-600">
+            Tailor ERPNext to your exact specifications. We develop custom
+            features, reports, and integrations to match your unique
+            workflows.
+          </p>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="400">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Training & Support
+          </h3>
+          <p class="text-gray-600">
+            Empower your team with comprehensive training modules. Our
+            dedicated support team is always ready to assist you
+            post-implementation.
+          </p>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-database"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Data Migration</h3>
+          <p class="text-gray-600">
+            Securely and accurately migrate your existing business data from
+            legacy systems to ERPNext with zero downtime.
+          </p>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Frappe App Development
+          </h3>
+          <p class="text-gray-600">
+            Leverage the power of the Frappe Framework to build custom, modern
+            web applications for any business need.
+          </p>
+        </div>
+        <div class="service-card" data-aos="fade-up" data-aos-delay="400">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-hands-helping"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Consultation & Strategy
+          </h3>
+          <p class="text-gray-600">
+            Work with our experts to map your business processes and devise a
+            strategic roadmap for a successful ERP implementation.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why-us" class="py-20 relative overflow-hidden">
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="section-heading-wrapper">
+        <span class="background-text" aria-hidden="true">WHY US</span>
+        <h2 class="section-title" data-aos="fade-up">Why Partner With Exalix Tech?</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+          We are more than just developers; we are your strategic partners in
+          digital transformation.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16" style="text-align:center">
+        <div class="why-us-card" data-aos="zoom-in">
+          <div class="text-5xl text-[#0f172b] mx-auto mb-4">
+            <i class="fas fa-award"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Certified Experts
+          </h3>
+          <p class="text-gray-600">
+            Our team consists of certified ERPNext professionals with years of
+            experience across multiple industries.
+          </p>
+        </div>
+        <div class="why-us-card" data-aos="zoom-in" data-aos-delay="100">
+          <div class="text-5xl text-[#0f172b] mx-auto mb-4">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Proven Methodology
+          </h3>
+          <p class="text-gray-600">
+            We follow an agile and structured implementation process to ensure
+            projects are delivered on time and within budget.
+          </p>
+        </div>
+        <div class="why-us-card" data-aos="zoom-in" data-aos-delay="200">
+          <div class="text-5xl text-[#0f172b] mx-auto mb-4">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Tailored Solutions
+          </h3>
+          <p class="text-gray-600">
+            We believe one size doesn't fit all. We dive deep into your
+            business to provide truly customized solutions.
+          </p>
+        </div>
+        <div class="why-us-card" data-aos="zoom-in" data-aos-delay="300">
+          <div class="text-5xl text-[#0f172b] mx-auto mb-4">
+            <i class="fas fa-headset"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">
+            Dedicated Support
+          </h3>
+          <p class="text-gray-600">
+            Your success is our priority. We offer dedicated, post-launch
+            support to ensure your system runs smoothly.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="industries" class="py-20 bg-white">
+    <div class="container mx-auto px-6">
+      <div class="section-heading-wrapper">
+        <span class="background-text" aria-hidden="true">INDUSTRIES</span>
+        <h2 class="section-title" data-aos="fade-up">
+          Our Expertise Across Industries
+        </h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+          We have a proven track record of successful ERPNext implementations
+          for businesses in various sectors.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-16" style="text-align:center">
+        <div class="industry-card" data-aos="fade-right">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <h3 class="font-bold text-xl mb-2">Manufacturing</h3>
+          <p class="text-gray-600">
+            From BOMs to shop floor control, we streamline your entire
+            production lifecycle.
+          </p>
+        </div>
+        <div class="industry-card" data-aos="fade-right" data-aos-delay="100">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-store"></i>
+          </div>
+          <h3 class="font-bold text-xl mb-2">Retail</h3>
+          <p class="text-gray-600">
+            We integrate POS, inventory, and e-commerce for a seamless
+            omnichannel retail experience.
+          </p>
+        </div>
+        <div class="industry-card" data-aos="fade-left" data-aos-delay="100">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-truck"></i>
+          </div>
+          <h3 class="font-bold text-xl mb-2">Distribution</h3>
+          <p class="text-gray-600">
+            Optimize your supply chain with our expertise in inventory and
+            logistics management.
+          </p>
+        </div>
+        <div class="industry-card" data-aos="fade-left">
+          <div class="text-4xl text-[#0f172b] mb-4">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <h3 class="font-bold text-xl mb-2">Healthcare</h3>
+          <p class="text-gray-600">
+            Implement patient management, billing, and pharmacy modules with
+            HIPAA compliance in mind.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="process" class="py-20 relative overflow-hidden">
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="section-heading-wrapper">
+        <span class="background-text" aria-hidden="true">PROCESS</span>
+        <h2 class="section-title" data-aos="fade-up">Our Proven Implementation Process</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+          We follow a structured, transparent process to guarantee a successful ERPNext deployment.
+        </p>
+      </div>
+      <div class="relative mt-12 md:mt-20">
+        <div class="hidden md:block absolute border-opacity-20 border-gray-700 h-full border" style="left: 50%"></div>
+
+        <div class="space-y-8 md:space-y-0">
+          <div class="md:flex md:justify-between md:items-center w-full">
+            <div class="md:w-5/12"></div>
+            <div
+              class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 md:w-12 md:h-12 rounded-full mx-auto md:mx-0">
+              <h1 class="mx-auto font-semibold text-sm md:text-lg text-white"><i class="fas fa-search"></i></h1>
+            </div>
+            <div class="bg-white rounded-lg shadow-xl w-full md:w-5/12 px-6 py-4 mt-4 md:mt-0" data-aos="fade-left">
+              <span class="font-bold text-[#0f172b] text-xl md:text-2xl">01</span>
+              <h3 class="mb-3 font-bold text-gray-800 text-lg md:text-xl">Discovery & Analysis</h3>
+              <p class="text-sm leading-snug tracking-wide text-gray-600">
+                We start by understanding your business processes, requirements, and goals to create a detailed project
+                blueprint.
+              </p>
+            </div>
+          </div>
+
+          <div class="md:flex md:justify-between md:flex-row-reverse md:items-center w-full">
+            <div class="md:w-5/12"></div>
+            <div
+              class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 md:w-12 md:h-12 rounded-full mx-auto md:mx-0">
+              <h1 class="mx-auto font-semibold text-sm md:text-lg text-white"><i class="fas fa-tools"></i></h1>
+            </div>
+            <div class="bg-white rounded-lg shadow-xl w-full md:w-5/12 px-6 py-4 mt-4 md:mt-0" data-aos="fade-right">
+              <span class="font-bold text-[#0f172b] text-xl md:text-2xl">02</span>
+              <h3 class="mb-3 font-bold text-gray-800 text-lg md:text-xl">Implementation & Customization</h3>
+              <p class="text-sm leading-snug tracking-wide text-gray-600">
+                Our team configures and customizes ERPNext based on the blueprint, ensuring a perfect fit for your
+                operations.
+              </p>
+            </div>
+          </div>
+
+          <div class="md:flex md:justify-between md:items-center w-full">
+            <div class="md:w-5/12"></div>
+            <div
+              class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 md:w-12 md:h-12 rounded-full mx-auto md:mx-0">
+              <h1 class="mx-auto font-semibold text-sm md:text-lg text-white"><i class="fas fa-user-graduate"></i></h1>
+            </div>
+            <div class="bg-white rounded-lg shadow-xl w-full md:w-5/12 px-6 py-4 mt-4 md:mt-0" data-aos="fade-left">
+              <span class="font-bold text-[#0f172b] text-xl md:text-2xl">03</span>
+              <h3 class="mb-3 font-bold text-gray-800 text-lg md:text-xl">Training & Go-Live</h3>
+              <p class="text-sm leading-snug tracking-wide text-gray-600">
+                We train your team to use the new system effectively and manage a smooth transition to the live
+                environment.
+              </p>
+            </div>
+          </div>
+
+          <div class="md:flex md:justify-between md:flex-row-reverse md:items-center w-full">
+            <div class="md:w-5/12"></div>
+            <div
+              class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 md:w-12 md:h-12 rounded-full mx-auto md:mx-0">
+              <h1 class="mx-auto font-semibold text-sm md:text-lg text-white"><i class="fas fa-life-ring"></i></h1>
+            </div>
+            <div class="bg-white rounded-lg shadow-xl w-full md:w-5/12 px-6 py-4 mt-4 md:mt-0" data-aos="fade-right">
+              <span class="font-bold text-[#0f172b] text-xl md:text-2xl">04</span>
+              <h3 class="mb-3 font-bold text-gray-800 text-lg md:text-xl">Ongoing Support</h3>
+              <p class="text-sm leading-snug tracking-wide text-gray-600">
+                Our commitment doesn't end at go-live. We provide continuous support and maintenance to ensure long-term
+                success.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="testimonials" class="py-20">
+    <div class="container mx-auto px-6">
+      <div class="section-heading-wrapper">
+        <span class="background-text" aria-hidden="true">CLIENTS</span>
+        <h2 class="section-title" data-aos="fade-up">What Our Clients Say</h2>
+        <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">
+          Real stories from businesses we've helped succeed with ERPNext.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-16">
+        <div>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-md" data-aos="flip-left" data-aos-delay="400">
+          <p class="text-gray-600 mb-6">
+            "Working with Exalix Tech was a game-changer. They
+            didn't just implement software; they re-engineered our
+            processes for peak efficiency. With ERPNext, we have a 360-
+            degree view of our entire operation for the first time. The clarity
+            and control are simply unparalleled."
+          </p>
+          <div class="flex items-center">
+            <img class="w-12 h-12 rounded-full mr-4" src="https://placehold.co/100x100/E2E8F0/4A5568?text=KP"
+              alt="Avatar of Kamlesh Patel" />
+            <div>
+              <p class="font-bold text-gray-800">Kamlesh Patel</p>
+              <p class="text-sm text-gray-500">
+                Founder, Nirali Ceramic
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="py-20 text-white" style="background:#00425c">
+    <div class="container mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div data-aos="fade-right">
+          <h2 class="text-3xl md:text-4xl font-bold" style="color:white">
+            Ready to Start Your ERPNext Journey?
+          </h2>
+          <p class="mt-4 text-lg text-gray-300">
+            Let's discuss your business needs. Schedule a free, no-obligation
+            consultation with our ERPNext experts to explore how we can help
+            you achieve your goals.
+          </p>
+          <div class="mt-8 space-y-4">
+            <p class="flex items-center">
+              <i class="fas fa-map-marker-alt text-slate-400 mr-3"></i>
+              Ahmedabad, Gujarat
+            </p>
+            <p class="flex items-center">
+              <i class="fas fa-phone text-slate-400 mr-3"></i>
+              +91 97972 53460, +91 6353 885 239
+            </p>
+            <p class="flex items-center">
+              <i class="fas fa-envelope text-slate-400 mr-3"></i>
+              info@exalix.tech
+            </p>
+          </div>
+        </div>
+        <div class="bg-white p-8 rounded-lg shadow-2xl" data-aos="fade-left">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            Get a Free Consultation
+          </h3>
+          <form id="inquiryForm">
+            <div class="mb-4">
+              <label for="name" class="block text-gray-700 font-medium mb-2">Full Name</label>
+              <input type="text" id="name" name="name"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 text-gray-800"
+                required />
+            </div>
+            <div class="mb-4">
+              <label for="email" class="block text-gray-700 font-medium mb-2">Work Email</label>
+              <input type="email" id="email" name="email"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 text-gray-800"
+                required />
+            </div>
+            <div class="mb-4">
+              <label for="company" class="block text-gray-700 font-medium mb-2">Company Name</label>
+              <input type="text" id="company" name="company"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 text-gray-800" />
+            </div>
+            <div class="mb-6">
+              <label for="message" class="block text-gray-700 font-medium mb-2">Your Requirements</label>
+              <textarea id="message" name="message" rows="3"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-500 text-gray-800"
+                placeholder="Tell us a bit about your project..." required></textarea>
+            </div>
+            <button type="submit"
+              class="w-full bg-[#00425c] text-white py-3 rounded-lg font-bold hover:bg-slate-800 transition duration-300">
+              Submit Request
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="text-white py-12" style="background:#023344">
+    <div class="container mx-auto px-6 text-center">
+      <p>&copy; 2025 Exalix Tech. All Rights Reserved.</p>
+      <p class="text-gray-400 mt-2">
+        Your Trusted ERPNext Implementation Partner.
+      </p>
+      <div class="mt-6 flex justify-center space-x-6">
+        <a href="https://www.instagram.com/exalix_tech?igsh=MXB3anpsejQ0aXh0bQ%3D%3D&utm_source=qr" class="text-gray-400 hover:text-white transition duration-300"><i
+            class="fab fa-instagram text-2xl"></i></a>
+        <a href="https://www.linkedin.com/company/exalix-tech/" class="text-gray-400 hover:text-white transition duration-300"><i
+            class="fab fa-linkedin text-2xl"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 800,
+      once: true,
+      disable: 'mobile' // Optionally disable AOS on mobile for performance
+    });
+
+    // Navbar scroll effect
+    const navbar = document.getElementById("navbar");
+    window.onscroll = function () {
+      if (window.pageYOffset > 50) {
+        navbar.classList.add("scrolled");
+      } else {
+        navbar.classList.remove("scrolled");
+      }
+    };
+
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById("mobile-menu-button");
+    const mobileMenu = document.getElementById("mobile-menu");
+    mobileMenuButton.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // Close mobile menu when a link is clicked
+    const mobileMenuLinks = mobileMenu.getElementsByTagName("a");
+    for (let link of mobileMenuLinks) {
+      link.addEventListener("click", () => {
+        mobileMenu.classList.add("hidden");
+      });
+    }
+  </script>
+  <script>
+document.getElementById("inquiryForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = {
+        lead_name: document.getElementById("name").value,
+        email_id: document.getElementById("email").value,
+        company_name: document.getElementById("company").value,
+        description: document.getElementById("message").value
+    };
+
+    frappe.call({
+        method: "custom_app.api.lead.submit_lead",
+        args: data,
+        callback: function(r) {
+            if (r.message.status === "success") {
+                document.getElementById("inquiryForm").reset();
+            }
+        },
+        error: function(err) {
+            console.error(err);
+        }
+    });
+});
+
+</script>
+</body>
+
+</html>
