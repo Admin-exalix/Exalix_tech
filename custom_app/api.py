@@ -1,17 +1,21 @@
 import frappe
 
-@frappe.whitelist()
-def set_default_company():
-    user = frappe.session.user
-    company = frappe.db.get_value(
-        "User Permission",
-        {"user": user, "allow": "Company", "is_default": 1},
-        "for_value"
-    )
-
-    if company:
-        frappe.defaults.set_user_default("Company", company)
-        frappe.defaults.set_user_default("company", company)
-        return {"company": company}
-    else:
-        frappe.throw("No default company assigned to your account. Please contact the administrator.")
+@frappe.whitelist(allow_guest=True)
+def submit_lead(lead_name, email_id=None, company_name=None, description=None, phone=None):
+    """
+    Create a Lead in ERPNext from guest submission
+    """
+    try:
+        lead = frappe.get_doc({
+            "doctype": "Lead",
+            "lead_name": lead_name,
+            "email_id": email_id,
+            "company_name": company_name,
+            "description": description,
+            "phone": phone  # <-- added
+        })
+        lead.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return {"status": "success", "message": "Lead created successfully"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
