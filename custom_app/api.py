@@ -19,3 +19,21 @@ def submit_lead(lead_name, email_id=None, company_name=None, description=None, p
         return {"status": "success", "message": "Lead created successfully"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+
+# custom_app/custom_app/api.py
+import frappe
+from frappe import _
+
+@frappe.whitelist(allow_guest=True)
+def login(usr, pwd):
+    """Custom login for AJAX"""
+    from frappe.auth import LoginManager
+    try:
+        lm = LoginManager()
+        lm.authenticate(user=usr, pwd=pwd)
+        lm.login()
+        frappe.db.commit()
+        return {"message": "Logged in"}
+    except frappe.AuthenticationError:
+        frappe.throw(_("Invalid login credentials"))

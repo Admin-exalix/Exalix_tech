@@ -1,0 +1,286 @@
+{% extends "templates/web.html" %}
+
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<style>
+body {
+    font-family: "Inter", sans-serif;
+    /* Updated background: animated gradient */
+    background: linear-gradient(145deg, #90C3C8, #b1dbe0, #ffffff);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Keyframes for the background gradient animation */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Container for animated shapes */
+.bg-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-shapes div {
+    position: absolute;
+    display: block;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: float 25s linear infinite;
+    bottom: -150px;
+}
+
+/* Different sizes and animation delays for shapes */
+.bg-shapes div:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+.bg-shapes div:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+.bg-shapes div:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+.bg-shapes div:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+.bg-shapes div:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+.bg-shapes div:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+.bg-shapes div:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+.bg-shapes div:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+.bg-shapes div:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+.bg-shapes div:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+
+/* Keyframes for floating shapes animation */
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-1000px) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.login-container {
+    z-index: 10;
+    position: relative;
+}
+
+/* Added animation to the login card */
+.login-card {
+    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* Keyframes for card fade-in-up animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cta-button {
+    padding: .75rem 1.5rem;
+    border-radius: .5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    background-color: #0f172b;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    /* Smoother transition */
+    transition: transform .3s ease, box-shadow .3s ease;
+    box-shadow: 0 4px 14px 0 rgba(15, 23, 43, .25);
+}
+
+.cta-button:hover {
+    /* Enhanced hover effect */
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px -5px #00425c;
+}
+
+.cta-button:active {
+    transform: translateY(-1px);
+}
+
+.form-input-with-icon {
+    position: relative;
+}
+.form-input-with-icon .input-icon {
+    position: absolute;
+    left: .75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #9ca3af;
+    transition: color 0.2s ease;
+}
+.form-input-with-icon .styled-input {
+    padding-left: 2.5rem;
+    border-radius: .5rem;
+    border-color: #d1d5db;
+    transition: all 0.2s ease;
+}
+
+/* Improved focus state */
+.styled-input:focus {
+    --tw-ring-color: #00425c;
+    border-color: #00425c;
+    box-shadow: 0 0 0 3px rgba(0, 66, 92, 0.2);
+    outline: none;
+}
+.styled-input:focus + .input-icon,
+.styled-input:not(:placeholder-shown) + .input-icon {
+    color: #00425c; /* Make icon active color */
+}
+
+#login_error {
+    display: none;
+}
+</style>
+{% endblock %}
+
+{% block page_content %}
+<!-- Background shapes container -->
+<div class="bg-shapes">
+    <div></div> <div></div> <div></div> <div></div> <div></div>
+    <div></div> <div></div> <div></div> <div></div> <div></div>
+</div>
+
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 login-container">
+  <!-- Added .login-card class for animation and styling -->
+  <div class="max-w-md w-full p-8 md:p-10 rounded-2xl shadow-2xl login-card">
+    <div class="text-center mb-6">
+      <img class="w-24 h-auto mx-auto" src="/files/Logo.png" alt="Exalix Tech Logo">
+    </div>
+
+    <h2 class="mt-4 text-center text-3xl font-extrabold text-gray-900">Exalix Tech</h2>
+    <p class="mt-2 text-center text-sm text-gray-600">Access your ERPNext portal</p>
+
+    <div id="login_error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative my-4"></div>
+
+    <form id="login_form" class="mt-8 space-y-6">
+      <div>
+        <div class="form-input-with-icon">
+            <i class="fas fa-user input-icon"></i>
+            <input id="login_usr" name="usr" type="text" autocomplete="off" required
+              class="appearance-none block w-full px-3 py-3 border focus:outline-none styled-input"
+              placeholder="Username">
+        </div>
+      </div>
+
+      <div>
+        <div class="form-input-with-icon">
+            <i class="fas fa-lock input-icon"></i>
+            <input id="login_pwd" name="pwd" type="password" autocomplete="current-password" required
+              class="appearance-none block w-full px-3 py-3 border focus:outline-none styled-input"
+              placeholder="Password">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end">
+        <div class="text-sm">
+          <a href="#forgot" class="font-medium hover:text-[#0f172b]" style="color: #00425c;">Forgot Password?</a>
+        </div>
+      </div>
+
+      <div>
+        <button type="submit" class="cta-button w-full justify-center">
+          <span>Login</span>
+          <i class="fas fa-arrow-right ml-3"></i>
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-6 text-center text-xs text-gray-500">
+      &copy; {{ frappe.utils.now_datetime().year }} Exalix Tech. All Rights Reserved.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$(document).ready(function() {
+    // This script remains unchanged as it's for functionality, not style.
+    $("#login_form").on("submit", function(e){
+        e.preventDefault();
+        const usr = $("#login_usr").val();
+        const pwd = $("#login_pwd").val();
+
+        const $submitButton = $(this).find('button[type="submit"]');
+        $submitButton.prop('disabled', true).css('opacity', 0.7);
+        $("#login_error").hide();
+
+        $.ajax({
+            type: "POST",
+            url: "/api/method/custom_app.api.login",
+            data: JSON.stringify({ usr, pwd }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+                "X-Frappe-CSRF-Token": frappe.csrf_token
+            },
+            success: function(r) {
+                window.location.href = "/app";
+            },
+            error: function(xhr){
+                let msg = "Login failed. Please check your credentials."; 
+                try {
+                    const jsonMatch = xhr.responseText.match(/{.*}/s); 
+                    let resp = null;
+
+                    if (jsonMatch && jsonMatch[0]) {
+                        resp = JSON.parse(jsonMatch[0]);
+                    } else {
+                        throw new Error("No JSON found in response");
+                    }
+                    
+                    if (resp._server_messages) {
+                        const serverMsgStr = resp._server_messages[0];
+                        const serverMsgObj = JSON.parse(serverMsgStr);
+                        msg = serverMsgObj.message || msg;
+                    } else if (resp.message) {
+                        msg = resp.message;
+                    } else if (resp.exception) {
+                        const match = resp.exception.match(/frappe\.exceptions\..*?: (.*)/);
+                        if (match && match[1]) {
+                            msg = match[1];
+                        } else {
+                            msg = resp.exception.split('\n').pop().trim();
+                        }
+                    }
+                } catch(e){
+                    let responseText = xhr.responseText || "";
+                    if (responseText.trim().startsWith("<!DOCTYPE html>")) {
+                        msg = "Login failed. A server error occurred.";
+                    }
+                }
+                $("#login_error").show().text(msg);
+                $submitButton.prop('disabled', false).css('opacity', 1);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
